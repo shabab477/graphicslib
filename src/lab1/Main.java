@@ -22,6 +22,10 @@ public class Main {
     public static void main(String[] args) {
         GLCapabilities capabilities = new GLCapabilities(GLProfile.get(GLProfile.GL2));
         final GLCanvas glcanvas = new GLCanvas(capabilities);
+        
+        //This is where we put graphics event listener. 
+        //Implement the Event Listener class to use a more object
+        //oriented approach
         glcanvas.addGLEventListener(new GLEventListener() {
 
             @Override
@@ -43,6 +47,7 @@ public class Main {
         
         glcanvas.setSize(300, 300);
         JFrame frame = new JFrame("My GL canvas");
+        //Close on frame close button
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         frame.getContentPane().add(glcanvas);
