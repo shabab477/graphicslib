@@ -66,15 +66,19 @@ public class Main {
 
             if(x1 > x2)
             {
-                //Swapping
-                float temp = x1;
-                x1 = x2;
-                x2 = temp;
-
-                temp = y1;
-                y1 = y2;
-                y2 = temp;
+                swap();
             }
+        }
+        
+        private void swap()
+        {
+            //Swapping
+            float temp = this.x1;
+            this.x1 = this.x2;
+            this.x2 = temp;
+            temp = this.y1;
+            this.y1 = this.y2;
+            this.y2 = temp;
         }
 
         public void draw(GL2 gl)
@@ -82,22 +86,27 @@ public class Main {
             //System.out.println("calling");
 
             float delta = (y2 - y1)/(x2 - x1);
+            //System.out.println(delta / (1 / 0.00001f));
             if(delta >= -1 && delta <= 1)
             {
                 while(x1 <= x2)
                 {
                     gl.glVertex2d(x1, y1);
-                    y1 += (delta / 0.00001f);
-                    x1 += 0.00001f;
+                    y1 += (delta / 1000);
+                    x1 += 0.001f;
                 }
             }
             else
             {
+                if(y1 > y2)
+                    swap();
+                
                 while(y1 <= y2)
                 {
                     gl.glVertex2d(x1, y1);
-                    x1 += (1/(delta / 0.00001f));
-                    y1 += 0.00001f;
+                    x1 += ((1 / delta) / 1000);
+                    System.out.println("here delta " + ((1 / delta) / 1000));
+                    y1 += 0.001f;
                 }
             }
         }
