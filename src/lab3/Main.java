@@ -54,27 +54,27 @@ public class Main {
     
     static class ConvertedPoint
     {
-        int x;
-        int y;
+        float x;
+        float y;
 
-        public ConvertedPoint(int x, int y) {
+        public ConvertedPoint(float x, float y) {
             this.x = x;
             this.y = y;
         }
 
-        public int getX() {
+        public float getX() {
             return x;
         }
 
-        public void setX(int x) {
+        public void setX(float x) {
             this.x = x;
         }
 
-        public int getY() {
+        public float getY() {
             return y;
         }
 
-        public void setY(int y) {
+        public void setY(float y) {
             this.y = y;
         }
         
@@ -83,7 +83,7 @@ public class Main {
     
     static interface ZoneCalculator
     {
-        ConvertedPoint calculate(int x, int y); 
+        ConvertedPoint calculate(float x, float y); 
     }
     
     
@@ -97,7 +97,7 @@ public class Main {
         private final GL2 canvas;
         
         private final ZoneCalculator calculator;
-        private static final float FACTOR = 0.01f;
+        private static final float FACTOR = 0.0001f;
         
         public Point(float x1, float x2, float y1, float y2, GL2 canvas) {
             this.x1 = x1;
@@ -108,11 +108,40 @@ public class Main {
             calculator = findZone();
         }
         
+        public void drawPoint()
+        {
+            float dy = y2 - y1;
+            float dx = x2 - x1;
+            
+            float decisionP = dy - (dx / 2);
+            float tempX = x1, tempY = y1;
+            ConvertedPoint point = calculator.calculate(tempX, tempY);
+            canvas.glVertex2d(point.getX(), point.getY());
+            
+            while(tempX <= x2)
+            {
+                tempX += FACTOR;
+                if(decisionP < 0)
+                {
+                    //E chosen
+                    decisionP += dy;
+                }
+                else
+                {
+                    decisionP += dy - dx;
+                    tempY += FACTOR;
+                }
+                point = calculator.calculate(tempX, tempY);
+                canvas.glVertex2d(point.getX(), point.getY());
+            }
+        }
         
         private ZoneCalculator findZone()
         {
             float dx = x2 - x1;
             float dy = y2 - y1;
+            System.out.println("here dx " + dx);
+            System.out.println("here dy " + dy);
             
             if(dx >= 0 && dy >= 0)
             {
@@ -120,9 +149,10 @@ public class Main {
                 if(Math.abs(dx) >= Math.abs(dy))
                 {
                     //z0
+                    System.out.println("ZONE 0");
                     return new ZoneCalculator() {
                         @Override
-                        public ConvertedPoint calculate(int x, int y) {
+                        public ConvertedPoint calculate(float x, float y) {
                             return new ConvertedPoint(x, y);
                         }
                     };
@@ -135,27 +165,129 @@ public class Main {
                     y1 = temp;
                     
                     temp = x2;
-                    x2 = 
+                    x2 = y2;
+                    y2 = temp;
                     
                     return new ZoneCalculator() {
                         @Override
-                        public ConvertedPoint calculate(int x, int y) {
-                            
+                        public ConvertedPoint calculate(float x, float y) {
+                            float temp = x;
+                            x = y;
+                            y = temp;
+                            return new ConvertedPoint(x, y);
                         }
-                    }
+                    };
                 }
             }
             else if(dx < 0 && dy >= 0)
             {
                 //z2 or z3
+                if(Math.abs(dx) >= Math.abs(dy))
+                {
+                    //z3
+                    x2 *= -1;
+                    System.out.println("ZONE 3");
+                    return new ZoneCalculator() {
+                        @Override
+                        public ConvertedPoint calculate(float x, float y) {
+                            return new ConvertedPoint(x * -1, y);
+                        }
+                    };
+                }
+                else
+                {
+                    //z2
+                    x2 *= -1;
+                    float temp = x1;
+                    x1 = y1;
+                    y1 = temp;
+                    
+                    temp = x2;
+                    x2 = y2;
+                    y2 = temp;
+                    
+                    return new ZoneCalculator() {
+                        @Override
+                        public ConvertedPoint calculate(float x, float y) {
+                            x *= -1;
+                            return new ConvertedPoint(y, x);
+                        }
+                    };
+                }
             }
             else if(dx < 0 && dy < 0)
             {
                 //z4 or z5
+                if(Math.abs(dx) >= Math.abs(dy))
+                {
+                    //z4
+                    x2 *= -1;
+                    y2 *= -1;
+                    
+                    return new ZoneCalculator() {
+                        @Override
+                        public ConvertedPoint calculate(float x, float y) {
+                            return new ConvertedPoint(x * -1, y * -1);
+                        }
+                    };
+                }
+                else
+                {
+                    //z5
+                    x2 *= -1;
+                    y2 *= -1;
+                    
+                    float temp = x1;
+                    x1 = y1;
+                    y1 = temp;
+                    
+                    temp = x2;
+                    x2 = y2;
+                    y2 = temp;
+                    
+                    return new ZoneCalculator() {
+                        @Override
+                        public ConvertedPoint calculate(float x, float y) {
+                            x *= -1;
+                            y *= -1;
+                            return new ConvertedPoint(y, x);
+                        }
+                    };
+                }
             }
             else
             {
                 //z6 or z7
+                if(Math.abs(dx) >= Math.abs(dy))
+                {
+                    //z7
+                    y2 *= -1;
+                    return new ZoneCalculator() {
+                        @Override
+                        public ConvertedPoint calculate(float x, float y) {
+                            return new ConvertedPoint(x, y * -1);
+                        }
+                    };
+                }
+                else
+                {
+                    y2 *= -1;
+                    float temp = x1;
+                    x1 = y1;
+                    y1 = temp;
+                    
+                    temp = x2;
+                    x2 = y2;
+                    y2 = temp;
+                    
+                    return new ZoneCalculator() {
+                        @Override
+                        public ConvertedPoint calculate(float x, float y) {
+                            y *= -1;
+                            return new ConvertedPoint(y, x);
+                        }
+                    };
+                }
             }
         }
         
@@ -184,7 +316,7 @@ public class Main {
             gl.glVertex2i(1, 1);
             
             try {
-                reader = new BufferedReader(new FileReader(new File("slope_points")));
+                reader = new BufferedReader(new FileReader(new File("no_slope_points")));
                 String line = null;
                 while((line = reader.readLine()) != null)
                 {
@@ -193,7 +325,8 @@ public class Main {
                     float y1 = Float.parseFloat(points[1]) / SIZE_Y;
                     float x2 = Float.parseFloat(points[2]) / SIZE_X;
                     float y2 = Float.parseFloat(points[3]) / SIZE_Y;
-                    //new Point(x1, y1, x2, y2).draw(gl);
+                    System.out.println("");
+                    new Point(x1, x2, y1, y2, gl).drawPoint();
                     
                 }
             } catch (FileNotFoundException ex) {
